@@ -1,0 +1,35 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.log
+build/
+dist/
+*.spec
+.env
+
+# Python environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local data and secrets
+.env
+.env.*
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.pkl
+*.joblib
+
+# Runtime files
+*.log
+startup-log.txt
+startup-diagnostic.txt
+ui-backup*/
+*.zip
+reports/
+exports/

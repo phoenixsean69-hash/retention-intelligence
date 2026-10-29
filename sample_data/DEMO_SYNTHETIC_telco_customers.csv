@@ -1,0 +1,181 @@
+customerID,Contract,tenure,MonthlyCharges,TotalCharges,Churn,PaymentMethod
+DEMO-0001,Two year,33,36.02,1188.66,No,Bank transfer
+DEMO-0002,Month-to-month,54,90.81,4903.74,No,Credit card
+DEMO-0003,Month-to-month,51,36.29,1850.79,No,Credit card
+DEMO-0004,One year,54,95.78,5172.12,No,Credit card
+DEMO-0005,Month-to-month,49,29.1,1425.9,Yes,Electronic check
+DEMO-0006,Two year,12,91.93,1103.16,No,Electronic check
+DEMO-0007,Month-to-month,61,35.84,2186.24,No,Electronic check
+DEMO-0008,Month-to-month,10,32.37,323.7,Yes,Bank transfer
+DEMO-0009,One year,50,38.9,1945.0,No,Credit card
+DEMO-0010,Month-to-month,49,88.14,4318.86,No,Electronic check
+DEMO-0011,Two year,18,45.48,818.64,No,Bank transfer
+DEMO-0012,Month-to-month,4,63.14,252.56,Yes,Electronic check
+DEMO-0013,One year,30,27.19,815.7,No,Credit card
+DEMO-0014,Two year,12,87.48,1049.76,No,Bank transfer
+DEMO-0015,Month-to-month,53,52.58,2786.74,Yes,Bank transfer
+DEMO-0016,One year,21,40.59,852.39,Yes,Credit card
+DEMO-0017,Two year,34,43.99,1495.66,No,Credit card
+DEMO-0018,Month-to-month,32,98.43,3149.76,No,Bank transfer
+DEMO-0019,Month-to-month,72,111.74,8045.28,No,Bank transfer
+DEMO-0020,One year,50,46.0,2300.0,No,Electronic check
+DEMO-0021,Month-to-month,40,80.55,3222.0,No,Credit card
+DEMO-0022,Two year,7,29.3,205.1,No,Bank transfer
+DEMO-0023,Month-to-month,4,46.28,185.12,Yes,Credit card
+DEMO-0024,Two year,8,48.45,387.6,No,Electronic check
+DEMO-0025,One year,11,82.56,908.16,No,Bank transfer
+DEMO-0026,One year,50,37.47,1873.5,No,Electronic check
+DEMO-0027,Month-to-month,2,79.81,159.62,Yes,Bank transfer
+DEMO-0028,Month-to-month,14,51.2,716.8,No,Electronic check
+DEMO-0029,One year,69,100.31,6921.39,No,Bank transfer
+DEMO-0030,Month-to-month,14,43.05,602.7,Yes,Credit card
+DEMO-0031,Two year,33,101.53,3350.49,No,Bank transfer
+DEMO-0032,Month-to-month,49,64.84,3177.16,No,Electronic check
+DEMO-0033,One year,8,105.72,845.76,No,Electronic check
+DEMO-0034,Month-to-month,66,41.2,2719.2,No,Electronic check
+DEMO-0035,One year,48,57.63,2766.24,No,Electronic check
+DEMO-0036,Month-to-month,70,98.94,6925.8,Yes,Bank transfer
+DEMO-0037,One year,9,46.33,416.97,No,Bank transfer
+DEMO-0038,Month-to-month,43,79.27,3408.61,Yes,Credit card
+DEMO-0039,Two year,35,65.76,2301.6,No,Credit card
+DEMO-0040,One year,69,74.26,5123.94,No,Electronic check
+DEMO-0041,Month-to-month,60,69.16,4149.6,No,Credit card
+DEMO-0042,Month-to-month,47,108.22,5086.34,Yes,Credit card
+DEMO-0043,Month-to-month,59,83.28,4913.52,No,Bank transfer
+DEMO-0044,Two year,1,113.62,113.62,No,Bank transfer
+DEMO-0045,One year,4,40.21,160.84,Yes,Electronic check
+DEMO-0046,One year,28,88.31,2472.68,No,Bank transfer
+DEMO-0047,One year,48,51.95,2493.6,No,Electronic check
+DEMO-0048,One year,72,100.79,7256.88,No,Credit card
+DEMO-0049,Two year,12,34.14,409.68,No,Credit card
+DEMO-0050,Month-to-month,64,49.54,3170.56,Yes,Credit card
+DEMO-0051,Month-to-month,2,83.73,167.46,Yes,Credit card
+DEMO-0052,One year,19,74.22,1410.18,Yes,Bank transfer
+DEMO-0053,Month-to-month,36,54.87,1975.32,Yes,Credit card
+DEMO-0054,Month-to-month,11,44.81,492.91,Yes,Electronic check
+DEMO-0055,Month-to-month,18,77.53,1395.54,No,Electronic check
+DEMO-0056,One year,48,41.65,1999.2,No,Electronic check
+DEMO-0057,Two year,28,66.88,1872.64,No,Credit card
+DEMO-0058,Month-to-month,13,72.13,937.69,No,Electronic check
+DEMO-0059,Month-to-month,63,89.34,5628.42,No,Bank transfer
+DEMO-0060,Month-to-month,42,41.6,1747.2,Yes,Electronic check
+DEMO-0061,Two year,23,57.5,1322.5,No,Bank transfer
+DEMO-0062,Month-to-month,66,56.94,3758.04,Yes,Bank transfer
+DEMO-0063,Month-to-month,28,84.35,2361.8,No,Electronic check
+DEMO-0064,Month-to-month,3,100.16,300.48,No,Credit card
+DEMO-0065,Month-to-month,3,88.68,266.04,Yes,Bank transfer
+DEMO-0066,One year,31,84.83,2629.73,No,Electronic check
+DEMO-0067,One year,16,74.35,1189.6,No,Electronic check
+DEMO-0068,Month-to-month,29,24.63,714.27,No,Electronic check
+DEMO-0069,Month-to-month,9,28.73,258.57,No,Credit card
+DEMO-0070,One year,16,87.35,1397.6,No,Electronic check
+DEMO-0071,One year,14,113.71,1591.94,No,Bank transfer
+DEMO-0072,One year,69,78.13,5390.97,No,Credit card
+DEMO-0073,One year,5,57.69,288.45,No,Electronic check
+DEMO-0074,One year,49,111.92,5484.08,No,Electronic check
+DEMO-0075,Month-to-month,3,54.84,164.52,Yes,Bank transfer
+DEMO-0076,One year,72,38.98,2806.56,No,Electronic check
+DEMO-0077,One year,72,31.58,2273.76,No,Credit card
+DEMO-0078,One year,65,103.33,6716.45,No,Credit card
+DEMO-0079,Month-to-month,30,25.05,751.5,Yes,Bank transfer
+DEMO-0080,Month-to-month,56,89.34,5003.04,No,Credit card
+DEMO-0081,Month-to-month,32,112.67,3605.44,No,Credit card
+DEMO-0082,Month-to-month,30,64.16,1924.8,No,Credit card
+DEMO-0083,Two year,29,38.8,1125.2,No,Credit card
+DEMO-0084,One year,49,34.01,1666.49,No,Electronic check
+DEMO-0085,Month-to-month,58,74.08,4296.64,Yes,Electronic check
+DEMO-0086,Month-to-month,18,24.17,435.06,No,Bank transfer
+DEMO-0087,Month-to-month,33,30.23,997.59,Yes,Credit card
+DEMO-0088,Two year,60,61.51,3690.6,No,Credit card
+DEMO-0089,One year,70,26.06,1824.2,No,Bank transfer
+DEMO-0090,One year,26,93.17,2422.42,No,Bank transfer
+DEMO-0091,Two year,68,31.97,2173.96,No,Credit card
+DEMO-0092,One year,14,110.28,1543.92,No,Credit card
+DEMO-0093,Month-to-month,4,47.29,189.16,No,Credit card
+DEMO-0094,Month-to-month,12,64.66,775.92,No,Credit card
+DEMO-0095,Two year,44,46.6,2050.4,No,Electronic check
+DEMO-0096,Month-to-month,72,102.84,7404.48,No,Bank transfer
+DEMO-0097,Two year,22,54.79,1205.38,No,Electronic check
+DEMO-0098,Month-to-month,8,38.04,304.32,No,Credit card
+DEMO-0099,Month-to-month,28,40.89,1144.92,No,Credit card
+DEMO-0100,Month-to-month,61,83.93,5119.73,No,Credit card
+DEMO-0101,Month-to-month,24,97.95,2350.8,Yes,Credit card
+DEMO-0102,One year,36,113.6,4089.6,No,Credit card
+DEMO-0103,One year,44,76.08,3347.52,No,Bank transfer
+DEMO-0104,Month-to-month,6,75.38,452.28,Yes,Bank transfer
+DEMO-0105,Month-to-month,9,55.46,499.14,No,Credit card
+DEMO-0106,Two year,19,97.1,1844.9,No,Bank transfer
+DEMO-0107,Month-to-month,16,30.95,495.2,Yes,Electronic check
+DEMO-0108,Month-to-month,22,102.63,2257.86,Yes,Electronic check
+DEMO-0109,Month-to-month,71,72.59,5153.89,No,Credit card
+DEMO-0110,Month-to-month,56,27.05,1514.8,No,Bank transfer
+DEMO-0111,Month-to-month,51,57.37,2925.87,No,Bank transfer
+DEMO-0112,One year,10,105.98,1059.8,Yes,Electronic check
+DEMO-0113,One year,7,36.71,256.97,No,Electronic check
+DEMO-0114,Two year,41,42.89,1758.49,No,Credit card
+DEMO-0115,Month-to-month,29,69.8,2024.2,Yes,Electronic check
+DEMO-0116,Month-to-month,41,80.22,3289.02,No,Credit card
+DEMO-0117,Month-to-month,33,39.62,1307.46,Yes,Electronic check
+DEMO-0118,Month-to-month,61,86.19,5257.59,Yes,Electronic check
+DEMO-0119,Month-to-month,34,33.08,1124.72,No,Bank transfer
+DEMO-0120,One year,54,27.89,1506.06,No,Credit card
+DEMO-0121,One year,56,25.33,1418.48,No,Bank transfer
+DEMO-0122,Month-to-month,43,106.6,4583.8,Yes,Bank transfer
+DEMO-0123,Month-to-month,15,94.46,1416.9,No,Electronic check
+DEMO-0124,Month-to-month,71,108.46,7700.66,No,Credit card
+DEMO-0125,Two year,33,26.47,873.51,No,Bank transfer
+DEMO-0126,Month-to-month,11,38.96,428.56,No,Bank transfer
+DEMO-0127,Month-to-month,66,74.45,4913.7,Yes,Electronic check
+DEMO-0128,One year,31,32.99,1022.69,No,Bank transfer
+DEMO-0129,Month-to-month,66,58.7,3874.2,No,Electronic check
+DEMO-0130,One year,27,45.15,1219.05,No,Bank transfer
+DEMO-0131,Month-to-month,22,80.71,1775.62,No,Credit card
+DEMO-0132,Month-to-month,37,111.3,4118.1,Yes,Electronic check
+DEMO-0133,Month-to-month,55,31.05,1707.75,No,Credit card
+DEMO-0134,Two year,11,81.15,892.65,No,Bank transfer
+DEMO-0135,Two year,44,43.34,1906.96,No,Credit card
+DEMO-0136,Month-to-month,30,98.87,2966.1,Yes,Electronic check
+DEMO-0137,One year,70,61.48,4303.6,No,Credit card
+DEMO-0138,Month-to-month,26,33.11,860.86,No,Credit card
+DEMO-0139,Month-to-month,45,53.54,2409.3,No,Bank transfer
+DEMO-0140,One year,10,55.69,556.9,No,Electronic check
+DEMO-0141,Month-to-month,55,89.8,4939.0,No,Credit card
+DEMO-0142,One year,38,79.86,3034.68,No,Electronic check
+DEMO-0143,Month-to-month,1,97.5,97.5,Yes,Electronic check
+DEMO-0144,One year,20,91.27,1825.4,Yes,Electronic check
+DEMO-0145,Month-to-month,51,98.64,5030.64,No,Bank transfer
+DEMO-0146,Two year,37,71.69,2652.53,No,Credit card
+DEMO-0147,Month-to-month,27,106.07,2863.89,Yes,Credit card
+DEMO-0148,Month-to-month,31,90.28,2798.68,No,Electronic check
+DEMO-0149,One year,3,35.47,106.41,No,Electronic check
+DEMO-0150,Two year,53,86.05,4560.65,No,Credit card
+DEMO-0151,One year,17,41.95,713.15,No,Bank transfer
+DEMO-0152,Two year,17,57.3,974.1,No,Bank transfer
+DEMO-0153,Two year,5,55.96,279.8,No,Bank transfer
+DEMO-0154,Month-to-month,8,79.68,637.44,Yes,Bank transfer
+DEMO-0155,Month-to-month,69,68.98,4759.62,Yes,Bank transfer
+DEMO-0156,Month-to-month,28,64.95,1818.6,Yes,Bank transfer
+DEMO-0157,One year,55,82.89,4558.95,No,Bank transfer
+DEMO-0158,Two year,22,62.43,1373.46,No,Bank transfer
+DEMO-0159,One year,3,112.76,338.28,Yes,Credit card
+DEMO-0160,Month-to-month,68,97.61,6637.48,No,Bank transfer
+DEMO-0161,Month-to-month,44,56.94,2505.36,Yes,Bank transfer
+DEMO-0162,Month-to-month,13,75.61,982.93,Yes,Electronic check
+DEMO-0163,One year,67,78.54,5262.18,No,Electronic check
+DEMO-0164,Month-to-month,48,42.9,2059.2,Yes,Credit card
+DEMO-0165,One year,33,53.52,1766.16,No,Bank transfer
+DEMO-0166,One year,61,90.12,5497.32,No,Electronic check
+DEMO-0167,Month-to-month,33,74.24,2449.92,No,Electronic check
+DEMO-0168,Month-to-month,26,59.98,1559.48,No,Electronic check
+DEMO-0169,Month-to-month,42,114.91,4826.22,Yes,Bank transfer
+DEMO-0170,One year,31,26.92,834.52,No,Bank transfer
+DEMO-0171,Month-to-month,71,90.14,6399.94,No,Bank transfer
+DEMO-0172,Month-to-month,26,42.48,1104.48,No,Credit card
+DEMO-0173,One year,69,57.85,3991.65,No,Credit card
+DEMO-0174,Month-to-month,48,49.98,2399.04,No,Bank transfer
+DEMO-0175,One year,18,82.16,1478.88,No,Credit card
+DEMO-0176,Month-to-month,71,83.55,5932.05,Yes,Bank transfer
+DEMO-0177,Two year,58,73.27,4249.66,No,Credit card
+DEMO-0178,Month-to-month,54,65.19,3520.26,No,Bank transfer
+DEMO-0179,Month-to-month,28,81.95,2294.6,Yes,Electronic check
+DEMO-0180,Month-to-month,46,49.53,2278.38,Yes,Electronic check

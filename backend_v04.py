@@ -1,0 +1,318 @@
+"""Bridge for v0.4 operational modules; v0.3 import and explorer remain intact."""
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+from PySide6.QtCore import QObject, Property, Signal, Slot, QThread
+from PySide6.QtWidgets import QFileDialog
+from backend import Backend
+from analytics_engine import quality_report, segmentation
+from data_engine import CustomerDataset
+from ml_engine import train_model
+from report_engine import export_pdf, export_segments_csv
+from retention_store import CaseStore
+
+
+class TrainWorker(QObject):
+    ready = Signal(object)
+    failed = Signal(str)
+    def __init__(self, ds):
+        super().__init__()
+        self.ds = ds
+
+    @Slot()
+    def run(self):
+        try:
+            model = train_model(self.ds)
+            scores = model.predict(self.ds)
+            self.ready.emit((model, scores))
+        except Exception as exc:
+            self.failed.emit(str(exc))
+
+
+class DesktopBackend(Backend):
+    def __init__(self):
+        super().__init__()
+        self._cases = CaseStore(self._app_path / 'retention_cases.sqlite')
+        self._prefs_path = self._app_path / 'preferences.json'
+        self._prefs = {'risk_threshold':65, 'currency_label':'Source units', 'compact_rows':False}
+        try:
+            if self._prefs_path.exists():
+                saved = json.loads(self._prefs_path.read_text(encoding='utf-8'))
+                for key in self._prefs:
+                    if key in saved: self._prefs[key] = saved[key]
+        except (ValueError, OSError, TypeError):
+            pass
+        self._model = None
+        self._scores = []
+        self._training = False
+        self._modelMessage = 'Train a model from Model Lab to enable risk scoring.'
+        self._selected_customer = ''
+        self._thread = None
+        self._worker = None
+        self._dataset_fingerprint = self._fingerprint()
+        self._notice = ''
+
+    def _fingerprint(self):
+        if not self._data: return ''
+        try:
+            cfg = json.loads(self._settings_file.read_text(encoding='utf-8'))
+            path = Path(cfg['dataset_path'])
+            h = hashlib.sha256()
+            with path.open('rb') as f:
+                for part in iter(lambda: f.read(1024*1024), b''): h.update(part)
+            return h.hexdigest()[:24]
+        except (OSError, KeyError, ValueError):
+            return ''
+
+    @Slot(str)
+    def importPath(self, path):
+        if self._training:
+            self._notice = 'A training job is running. Finish training before replacing the dataset.'
+            self.changed.emit()
+            return
+        super().importPath(path)
+        # A new dataset invalidates model and predictions, regardless of whether import succeeded.
+        if not self._error:
+            self._dataset_fingerprint = self._fingerprint()
+            self._model = None
+            self._scores = []
+            self._modelMessage = 'Dataset changed. Train a model before predicting.'
+            self.changed.emit()
+
+    @Slot()
+    def clearDataset(self):
+        if self._training:
+            self._notice = 'Finish model training before removing the dataset.'
+            self.changed.emit()
+            return
+        super().clearDataset()
+        self._dataset_fingerprint = ''
+        self._model = None
+        self._scores = []
+        self._notice = ''
+        self.changed.emit()
+
+    @Property('QVariantMap', notify=Backend.changed)
+    def dataQuality(self):
+        return quality_report(self._data) if self._data else {'rows':0,'columns':0,'missingCells':0,'duplicateIds':0,'unlabeled':0,'recognized':0}
+
+    @Property('QVariantList', notify=Backend.changed)
+    def segmentationTypes(self):
+        return ['Contract','Tenure','Monthly charges','Payment method']
+
+    @Slot(str, result='QVariantList')
+    def getSegments(self, key):
+        return segmentation(self._data, key) if self._data else []
+
+    @Property('QVariantList', notify=Backend.changed)
+    def contractSegments(self):
+        return self.getSegments('Contract')
+
+    @Property('QVariantList', notify=Backend.changed)
+    def tenureSegments(self):
+        return self.getSegments('Tenure')
+
+    @Property('QVariantList', notify=Backend.changed)
+    def chargeSegments(self):
+        return self.getSegments('Monthly charges')
+
+    @Property('QVariantList', notify=Backend.changed)
+    def paymentSegments(self):
+        return self.getSegments('Payment method')
+
+    @Property(bool, notify=Backend.changed)
+    def modelReady(self): return self._model is not None
+
+    @Property(bool, notify=Backend.changed)
+    def modelTraining(self): return self._training
+
+    @Property(str, notify=Backend.changed)
+    def modelMessage(self): return self._modelMessage
+
+    @Property('QVariantMap', notify=Backend.changed)
+    def modelMetrics(self): return self._model.metrics if self._model else {}
+
+    @Property('QVariantList', notify=Backend.changed)
+    def modelDrivers(self): return self._model.drivers if self._model else []
+
+    @Property(str, notify=Backend.changed)
+    def modelVersion(self): return self._model.version if self._model else 'None'
+
+    @Property(int, notify=Backend.changed)
+    def riskThreshold(self): return int(self._prefs['risk_threshold'])
+
+    @Property(str, notify=Backend.changed)
+    def currencyLabel(self): return str(self._prefs['currency_label'])
+
+    @Property(bool, notify=Backend.changed)
+    def compactRows(self): return bool(self._prefs['compact_rows'])
+
+    @Property(str, notify=Backend.changed)
+    def noticeText(self): return self._notice
+
+    @Slot(int)
+    def setRiskThreshold(self, v):
+        self._prefs['risk_threshold'] = max(10,min(95,int(v)))
+        self._savePrefs()
+
+    @Slot(str)
+    def setCurrencyLabel(self, label):
+        if label not in {'Source units','USD','ZIG','EUR','GBP'}: return
+        self._prefs['currency_label'] = label
+        self._savePrefs()
+
+    @Slot(bool)
+    def setCompactRows(self, v):
+        self._prefs['compact_rows'] = bool(v)
+        self._savePrefs()
+
+    def _savePrefs(self):
+        self._prefs_path.write_text(json.dumps(self._prefs, indent=2), encoding='utf-8')
+        self._notice = 'Preferences saved on this computer.'
+        self.changed.emit()
+
+    @Slot()
+    def startTraining(self):
+        if self._training: return
+        if self._data is None:
+            self._modelMessage = 'Import a dataset before training.'
+            self.changed.emit()
+            return
+        self._training = True
+        self._modelMessage = 'Training Logistic Regression and evaluating a 25% stratified holdout…'
+        self.changed.emit()
+        # Snapshot data before starting a worker thread. Import is disabled while training.
+        snapshot = CustomerDataset(self._data.frame.copy(deep=True), dict(self._data.mapping), self._data.file_name)
+        thread = QThread(self)
+        worker = TrainWorker(snapshot)
+        worker.moveToThread(thread)
+        thread.started.connect(worker.run)
+        worker.ready.connect(self._trainingSucceeded)
+        worker.failed.connect(self._trainingFailed)
+        worker.ready.connect(thread.quit)
+        worker.failed.connect(thread.quit)
+        thread.finished.connect(worker.deleteLater)
+        thread.finished.connect(thread.deleteLater)
+        thread.finished.connect(self._releaseWorker)
+        self._thread = thread
+        self._worker = worker
+        thread.start()
+
+    def _releaseWorker(self):
+        self._thread = None
+        self._worker = None
+
+    @Slot(object)
+    def _trainingSucceeded(self, payload):
+        model, scores = payload
+        self._model = model
+        self._scores = scores
+        self._training = False
+        self._modelMessage = f"Model {model.version} trained. Scores are exploratory, not prospective forecasts."
+        self._notice = 'Model trained successfully. Holdout metrics are available in Model Lab.'
+        self.changed.emit()
+
+    @Slot(str)
+    def _trainingFailed(self, error):
+        self._training = False
+        self._modelMessage = 'Training failed: ' + error
+        self.changed.emit()
+
+    @Property('QVariantList', notify=Backend.changed)
+    def riskCustomers(self):
+        return [{**item, 'riskLabel': ('High' if item['probability'] >= self.riskThreshold else 'Below threshold')} for item in self._scores[:60]]
+
+    @Property(int, notify=Backend.changed)
+    def riskCount(self):
+        return sum(1 for c in self._scores if c['probability'] >= self.riskThreshold)
+
+    @Property(int, notify=Backend.changed)
+    def scoredCount(self): return len(self._scores)
+
+    @Slot(str, result='QVariantMap')
+    def customerRisk(self, customer_id):
+        needle = customer_id.strip().lower()
+        for record in self._scores:
+            if record['customerId'].lower() == needle:
+                return record
+        return {}
+
+    @Property('QVariantList', notify=Backend.changed)
+    def retentionCases(self):
+        return self._cases.list(self._dataset_fingerprint) if self._dataset_fingerprint else []
+
+    @Property(int, notify=Backend.changed)
+    def openCaseCount(self):
+        return sum(1 for row in self.retentionCases if row['status'] in {'Open','Contacted'})
+
+    @Slot(str,str,str)
+    def createCase(self, customer_id, action, note):
+        if not self._data:
+            self._notice = 'Import customer data before creating a retention case.'
+        elif not customer_id.strip():
+            self._notice = 'Enter a customer ID.'
+        elif not self._dataset_fingerprint:
+            self._notice = 'Dataset identity unavailable. Reimport your dataset.'
+        else:
+            actual_ids = self._data.frame[self._data.mapping['customer_id']].astype(str)
+            matches = actual_ids[actual_ids.str.lower() == customer_id.strip().lower()]
+            if matches.empty:
+                self._notice = 'Customer ID does not exist in the imported dataset.'
+            elif self._data.churn_series.loc[matches.index[0]] == True:
+                self._notice = 'This customer is already labeled churned. Retention cases are for retained or unlabeled customers.'
+            else:
+                self._cases.create(self._dataset_fingerprint, str(matches.iloc[0]), action or 'Review account', note[:1000])
+                self._notice = 'Retention case created. This does not prove the customer was saved.'
+        self.changed.emit()
+
+    @Slot(int,str)
+    def updateCase(self, case_id, status):
+        try:
+            self._cases.change_status(self._dataset_fingerprint, case_id, status)
+            self._notice = f'Case #{case_id} updated to {status}.'
+        except Exception as exc:
+            self._notice = str(exc)
+        self.changed.emit()
+
+    @Slot()
+    def exportAnalysisPdf(self):
+        if not self._data:
+            self._notice = 'Import a dataset to generate a report.'
+            self.changed.emit(); return
+        target,_ = QFileDialog.getSaveFileName(None,'Export churn report','churn_analysis.pdf','PDF files (*.pdf)')
+        if target:
+            try:
+                export_pdf(target,self._data,self.modelMetrics if self._model else None)
+                self._notice = 'PDF exported: ' + target
+            except Exception as exc: self._notice = 'PDF export failed: ' + str(exc)
+            self.changed.emit()
+
+    @Slot()
+    def exportSegmentsCsv(self):
+        if not self._data:
+            self._notice = 'Import a dataset to export segments.'
+            self.changed.emit(); return
+        target,_ = QFileDialog.getSaveFileName(None,'Export segments','churn_segments.csv','CSV files (*.csv)')
+        if target:
+            try:
+                export_segments_csv(target,self._data)
+                self._notice = 'Segment CSV exported: ' + target
+            except Exception as exc: self._notice = 'CSV export failed: ' + str(exc)
+            self.changed.emit()
+
+    @Slot()
+    def exportRiskCsv(self):
+        if not self._scores:
+            self._notice = 'Train a model before exporting risk scores.'
+            self.changed.emit(); return
+        target,_ = QFileDialog.getSaveFileName(None,'Export exploratory risk ranking','exploratory_risk.csv','CSV files (*.csv)')
+        if target:
+            import pandas as pd
+            try:
+                rows = [{**x, 'modelVersion':self.modelVersion,'riskThreshold':self.riskThreshold,'disclaimer':'In-sample exploratory score; not a 30-day forecast'} for x in self._scores]
+                pd.DataFrame(rows).to_csv(target,index=False)
+                self._notice = 'Risk CSV exported: ' + target
+            except Exception as exc: self._notice = 'Risk export failed: ' + str(exc)
+            self.changed.emit()
