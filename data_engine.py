@@ -12,6 +12,7 @@ def _key(value: str) -> str:
 
 ALIASES = {
     "customer_id": ("customerID", "customer_id", "customer id", "accountid", "id"),
+    "customer_name": ("customerName", "customer_name", "customer name", "name", "full_name", "fullname"),
     "churn": ("Churn", "Churn Value", "Churn Label", "churned", "is_churned"),
     "tenure": ("tenure", "tenure months", "tenure_months"),
     "contract": ("Contract", "contract_type", "contract type"),
@@ -122,7 +123,10 @@ class CustomerDataset:
         if query:
             identifiers = frame[self.mapping["customer_id"]].fillna("").astype(str)
             mask = identifiers.str.contains(query, case=False, regex=False)
-            # Search is intentionally limited to IDs in V0.1 for performance and privacy.
+            name_col = self.mapping.get("customer_name")
+            if name_col:
+                names = frame[name_col].fillna("").astype(str)
+                mask = mask | names.str.contains(query, case=False, regex=False)
             frame = frame.loc[mask]
         if "churn" in self.mapping:
             values = self.churn_series.loc[frame.index]
@@ -148,6 +152,7 @@ class CustomerDataset:
             status = churn.loc[idx]
             result.append({
                 "customerId": cell("customer_id"),
+                "customerName": cell("customer_name", "Unnamed customer"),
                 "contract": cell("contract"),
                 "tenure": cell("tenure"),
                 "monthly": cell("monthly_charges"),

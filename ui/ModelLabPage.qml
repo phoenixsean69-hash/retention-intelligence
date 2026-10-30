@@ -12,13 +12,13 @@ Item { id: root
                     Text { text: 'Train a baseline and inspect honest holdout performance'; font.pixelSize: 13; color: '#7B8794' }
                 }
                 Item { Layout.fillWidth: true }
-                UiButton { label: backend.modelTraining ? 'Training…' : 'Train baseline'; iconName: 'model'; disabled: backend.modelTraining || !backend.hasData; onClicked: backend.startTraining() }
+                UiButton { label: backend.modelTraining ? 'Training…' : (backend.modelReady ? 'Retrain baseline' : 'Train baseline'); iconName: 'model'; disabled: backend.modelTraining || !backend.hasData; onClicked: backend.startTraining() }
             }
-            Rectangle { Layout.fillWidth: true; Layout.leftMargin: 30; Layout.rightMargin: 30; implicitHeight: 82; radius: 12; color: '#EFF6FF'; border.color: '#D7E5FF'
+            Rectangle { Layout.fillWidth: true; Layout.leftMargin: 30; Layout.rightMargin: 30; implicitHeight: 82; radius: 12; color: '#FFFFFF'; border.color: '#E6ECF5'
                 RowLayout { anchors.fill: parent; anchors.margins: 20; spacing: 13
-                    AppIcon { iconName: 'model'; iconSize: 23; color: '#2563EB' }
+                    Rectangle { width: 4; height: 36; radius: 2; color: '#2563EB' }
                     ColumnLayout { Layout.fillWidth: true; spacing: 4
-                        Text { text: 'Logistic Regression · baseline classifier'; font.pixelSize: 14; font.weight: Font.DemiBold; color: '#1D4ED8' }
+                        Text { text: 'Logistic Regression · baseline classifier'; font.pixelSize: 14; font.weight: Font.DemiBold; color: '#102A43' }
                         Text { text: backend.modelMessage; font.pixelSize: 11; color: '#486581'; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                     }
                     BusyIndicator { running: backend.modelTraining; visible: running; Layout.preferredWidth: 32; Layout.preferredHeight: 32 }
@@ -31,7 +31,7 @@ Item { id: root
                 MetricCard { Layout.fillWidth: true; label: 'Precision'; value: backend.modelReady ? (backend.modelMetrics.precision*100).toFixed(1) + '%' : '—'; detail: 'Positive class, threshold 0.50'; iconName: 'model'; accent: '#F28C28' }
             }
             RowLayout { Layout.fillWidth: true; Layout.leftMargin: 30; Layout.rightMargin: 30; spacing: 15; Layout.alignment: Qt.AlignTop
-                Rectangle { Layout.fillWidth: true; Layout.preferredWidth: 440; Layout.preferredHeight: 360; Layout.alignment: Qt.AlignTop; color: '#FFFFFF'; radius: 14; border.color: '#E6ECF5'
+                Rectangle { Layout.fillWidth: true; Layout.preferredWidth: 440; Layout.preferredHeight: 330; Layout.alignment: Qt.AlignTop; color: '#FFFFFF'; radius: 14; border.color: '#E6ECF5'
                     ColumnLayout { anchors.fill: parent; anchors.margins: 24; spacing: 15
                         Text { text: 'Experiment details'; font.pixelSize: 17; font.weight: Font.DemiBold; color: '#102A43' }
                         Rectangle { Layout.fillWidth: true; height: 1; color: '#EDF2F7' }
@@ -48,13 +48,12 @@ Item { id: root
                             }
                         }
                         Item { Layout.fillHeight: true }
-                        Text { text: 'Random stratified holdout for cross-sectional demonstration, not a temporal validation.'; font.pixelSize: 11; color: '#7B8794'; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                     }
                 }
-                Rectangle { Layout.fillWidth: true; Layout.preferredWidth: 600; Layout.preferredHeight: 530; Layout.alignment: Qt.AlignTop; color: '#FFFFFF'; radius: 14; border.color: '#E6ECF5'
+                Rectangle { Layout.fillWidth: true; Layout.preferredWidth: 600; Layout.preferredHeight: 500; Layout.alignment: Qt.AlignTop; color: '#FFFFFF'; radius: 14; border.color: '#E6ECF5'
                     ColumnLayout { anchors.fill: parent; anchors.margins: 24; spacing: 12
                         Text { text: 'Strongest model coefficients'; font.pixelSize: 17; font.weight: Font.DemiBold; color: '#102A43' }
-                        Text { Layout.fillWidth: true; text: 'Associations in the fitted classifier, not explanations of what caused customers to churn.'; font.pixelSize: 11; color: '#7B8794'; wrapMode: Text.WordWrap }
+                        Text { Layout.fillWidth: true; text: 'The bars below show the strongest associations learned by the classifier.'; font.pixelSize: 11; color: '#7B8794'; wrapMode: Text.WordWrap }
                         Rectangle { Layout.fillWidth: true; height: 1; color: '#EDF2F7' }
                         Repeater { model: backend.modelDrivers
                             delegate: ColumnLayout { Layout.fillWidth: true; spacing: 3
@@ -71,9 +70,6 @@ Item { id: root
                         Item { Layout.fillHeight: true }
                     }
                 }
-            }
-            Rectangle { Layout.fillWidth: true; Layout.leftMargin: 30; Layout.rightMargin: 30; implicitHeight: 91; radius: 12; color: '#FFF8F1'; border.color: '#FAD7B0'
-                Text { anchors.fill: parent; anchors.margins: 18; text: 'Training excludes customer IDs and known post-outcome fields. Scores on training-set customers are exploratory; only the untouched holdout contributes to the evaluation above. Temporal validation and calibration are needed before deployment.'; font.pixelSize: 12; color: '#8A5A12'; wrapMode: Text.WordWrap; verticalAlignment: Text.AlignVCenter }
             }
             Item { height: 12 }
         }

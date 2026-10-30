@@ -52,7 +52,7 @@ Item {
                         Text { text: "Current dataset"; font.pixelSize: 16; font.weight: Font.DemiBold; color: "#102A43" }
                         Item { Layout.fillWidth: true }
                         Rectangle { width: loadedText.implicitWidth + 22; height: 25; radius: 13; color: backend.hasData ? "#EFF6FF" : "#F4F7FB"
-                            Text { id: loadedText; anchors.centerIn: parent; text: backend.isDemo ? "DEMO DATA" : (backend.hasData ? "LOADED" : "NOT LOADED"); font.pixelSize: 10; font.weight: Font.DemiBold; color: backend.hasData ? "#1D4ED8" : "#7B8794" }
+                            Text { id: loadedText; anchors.centerIn: parent; text: backend.hasData ? "LOADED" : "NOT LOADED"; font.pixelSize: 10; font.weight: Font.DemiBold; color: backend.hasData ? "#1D4ED8" : "#7B8794" }
                         }
                     }
                     Text { text: backend.dataName; font.pixelSize: 14; font.weight: Font.Medium; color: "#486581"; elide: Text.ElideRight; Layout.fillWidth: true }

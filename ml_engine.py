@@ -19,7 +19,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from data_engine import CustomerDataset, _key
 
-# Explicit allowlist. Churn-related output/reason/label columns are not eligible.
 SAFE_FEATURES = {
     'tenure', 'monthlycharges', 'totalcharges', 'contract', 'paymentmethod',
     'internetservice', 'techsupport', 'onlinesecurity', 'onlinebackup',
@@ -54,15 +53,25 @@ class TrainedModel:
         X = self._feature_frame(ds.frame)
         scores = self.pipeline.predict_proba(X)[:, 1]
         ids = ds.frame[ds.mapping['customer_id']].astype(str).values
+        if 'customer_name' in ds.mapping:
+            names = ds.frame[ds.mapping['customer_name']].fillna('Unnamed customer').astype(str).values
+        else:
+            names = np.array(['Unnamed customer'] * len(ds.frame), dtype=object)
         churn = ds.churn_series.values
         charges_col = ds.mapping.get('monthly_charges')
         charges = pd.to_numeric(ds.frame[charges_col], errors='coerce').fillna(0).values if charges_col else np.zeros(len(ds.frame))
         records = []
         for i, score in enumerate(scores):
             val = churn[i]
-            # Those already known as churned are excluded from active retention queues.
-            if val is True or val == True: continue
-            records.append({'customerId': str(ids[i]), 'probability': round(float(score) * 100, 1), 'monthly': round(float(charges[i]), 2), 'outcome': 'Unknown' if pd.isna(val) else 'Retained'})
+            if val is True or val == True:
+                continue
+            records.append({
+                'customerId': str(ids[i]),
+                'customerName': str(names[i]),
+                'probability': round(float(score) * 100, 1),
+                'monthly': round(float(charges[i]), 2),
+                'outcome': 'Unknown' if pd.isna(val) else 'Retained'
+            })
         return sorted(records, key=lambda x: x['probability'], reverse=True)
 
 
@@ -79,24 +88,27 @@ def train_model(ds: CustomerDataset) -> TrainedModel:
     y = labels[known].astype(int)
     if len(y.value_counts()) != 2 or int(y.value_counts().min()) < 10:
         raise ValueError('At least 10 churned and 10 retained records are required.')
-    # The common IBM sample contains derived post-outcome attributes. Exclude them.
     cols = [str(c) for c in frame.columns if _key(c) in SAFE_FEATURES and c not in {ds.mapping['churn'], ds.mapping['customer_id']}]
     if len(cols) < 2:
         raise ValueError('At least two usable pre-outcome customer feature columns are required.')
     nums = [c for c in cols if _key(c) in NUMERIC_FEATURES]
     cats = [c for c in cols if c not in nums]
     X = frame.loc[known, cols].copy()
-    for c in nums: X[c] = pd.to_numeric(X[c], errors='coerce')
-    for c in cats: X[c] = X[c].astype('string').fillna('Missing').astype(str)
+    for c in nums:
+        X[c] = pd.to_numeric(X[c], errors='coerce')
+    for c in cats:
+        X[c] = X[c].astype('string').fillna('Missing').astype(str)
     transformers = []
-    if nums: transformers.append(('number', Pipeline([('impute', SimpleImputer(strategy='median', keep_empty_features=True)), ('scale', StandardScaler())]), nums))
-    if cats: transformers.append(('category', Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', OneHotEncoder(handle_unknown='ignore'))]), cats))
+    if nums:
+        transformers.append(('number', Pipeline([('impute', SimpleImputer(strategy='median', keep_empty_features=True)), ('scale', StandardScaler())]), nums))
+    if cats:
+        transformers.append(('category', Pipeline([('impute', SimpleImputer(strategy='most_frequent')), ('encode', OneHotEncoder(handle_unknown='ignore'))]), cats))
     estimator = Pipeline([('prep', ColumnTransformer(transformers)), ('classifier', LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42))])
     Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=.25, random_state=42, stratify=y)
     estimator.fit(Xtrain, ytrain)
     p = estimator.predict_proba(Xtest)[:, 1]
     predictions = (p >= 0.5).astype(int)
-    tn, fp, fn, tp = confusion_matrix(ytest, predictions, labels=[0,1]).ravel()
+    tn, fp, fn, tp = confusion_matrix(ytest, predictions, labels=[0, 1]).ravel()
     score = {
         'rocAuc': round(float(roc_auc_score(ytest, p)), 3),
         'prAuc': round(float(average_precision_score(ytest, p)), 3),
@@ -111,5 +123,5 @@ def train_model(ds: CustomerDataset) -> TrainedModel:
     names = estimator.named_steps['prep'].get_feature_names_out()
     coefficients = estimator.named_steps['classifier'].coef_[0]
     ranked = sorted(zip(names, coefficients), key=lambda e: abs(e[1]), reverse=True)
-    drivers = [{'name': str(n).replace('number__','').replace('category__',''), 'effect': 'Higher estimated churn' if float(w)>0 else 'Lower estimated churn', 'weight': round(float(abs(w)), 3)} for n,w in ranked[:10]]
+    drivers = [{'name': str(n).replace('number__', '').replace('category__', ''), 'effect': 'Higher estimated churn' if float(w) > 0 else 'Lower estimated churn', 'weight': round(float(abs(w)), 3)} for n, w in ranked[:10]]
     return TrainedModel(estimator, cols, nums, cats, score, drivers, datetime.now().strftime('%Y%m%d-%H%M%S'))

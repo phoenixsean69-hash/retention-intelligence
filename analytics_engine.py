@@ -37,7 +37,6 @@ def segmentation(ds: CustomerDataset, dimension: str) -> list[dict]:
         field = ds.mapping.get('monthly_charges')
         if not field: return []
         values = pd.to_numeric(frame[field], errors='coerce')
-        # Fixed bins in original source units, not a currency assertion.
         group = pd.cut(values, bins=[-float('inf'), 35, 65, 95, float('inf')], labels=['≤35','35–65','65–95','>95']).astype(object).fillna('Missing')
     else:
         return []
@@ -49,3 +48,33 @@ def segmentation(ds: CustomerDataset, dimension: str) -> list[dict]:
         churned = int((observed == True).sum())
         results.append({'name': str(name), 'count': len(observed), 'churned': churned, 'retained': int(len(observed)-churned), 'rate': round(100 * churned / len(observed), 1)})
     return sorted(results, key=lambda item: item['rate'], reverse=True)[:12]
+
+
+def prevention_recommendations(ds: CustomerDataset) -> list[dict]:
+    overall = ds.metrics.get('rate') or 0.0
+    candidates = []
+
+    def add_if_any(dimension: str, title: str, action: str):
+        rows = segmentation(ds, dimension)
+        if not rows:
+            return
+        top = rows[0]
+        if top['rate'] <= 0:
+            return
+        candidates.append({
+            'title': title.format(segment=top['name']),
+            'segment': f"{dimension}: {top['name']}",
+            'rate': float(top['rate']),
+            'why': f"This group shows {top['rate']:.1f}% observed churn across {top['count']} customers.",
+            'action': action,
+        })
+
+    add_if_any('Contract', 'Contract offer review for {segment}', 'Promote longer contracts, bundle benefits, and proactive renewal outreach for customers on the highest-risk contract type.')
+    add_if_any('Tenure', 'Early-life retention play for {segment}', 'Strengthen onboarding, first-90-day check-ins, and service education for newer customers.')
+    add_if_any('Monthly charges', 'Value review for {segment}', 'Review pricing pressure, discounts, and plan-fit conversations where charge bands are linked to higher churn.')
+    add_if_any('Payment method', 'Payment experience improvement for {segment}', 'Encourage lower-friction payment options and fix payment-friction issues for the highest-risk payment method.')
+
+    ranked = sorted(candidates, key=lambda item: item['rate'], reverse=True)
+    for row in ranked:
+        row['priority'] = 'High priority' if row['rate'] >= overall + 10 else ('Medium priority' if row['rate'] >= overall + 3 else 'Watch list')
+    return ranked[:4]

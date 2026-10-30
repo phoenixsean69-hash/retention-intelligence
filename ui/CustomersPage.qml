@@ -18,14 +18,14 @@ Item {
                 Layout.fillWidth: true; Layout.leftMargin: 30; Layout.rightMargin: 30
                 ColumnLayout { spacing: 6
                     Text { text: "Customer explorer"; font.pixelSize: 26; font.weight: Font.DemiBold; color: "#102A43" }
-                    Text { text: "Explore customer attributes and observed churn outcomes"; font.pixelSize: 13; color: "#7B8794" }
+                    Text { text: "Explore customers, observed outcomes, and likely churn"; font.pixelSize: 13; color: "#7B8794" }
                 }
                 Item { Layout.fillWidth: true }
                 UiButton { label: "Export filtered"; iconName: "download"; primary: false; disabled: !backend.hasData; onClicked: backend.exportCustomers() }
             }
             Rectangle {
                 Layout.fillWidth: true; Layout.leftMargin: 30; Layout.rightMargin: 30
-                implicitHeight: 665; radius: 12; color: "#FFFFFF"; border.color: "#E6ECF5"
+                implicitHeight: 705; radius: 12; color: "#FFFFFF"; border.color: "#E6ECF5"
                 ColumnLayout {
                     anchors.fill: parent; anchors.margins: 21; spacing: 14
                     RowLayout { Layout.fillWidth: true; spacing: 12
@@ -36,7 +36,7 @@ Item {
                                 id: search
                                 anchors.fill: parent; anchors.leftMargin: 41; anchors.rightMargin: 10
                                 background: Item { }
-                                placeholderText: "Search customer ID..."
+                                placeholderText: "Search customer name or ID..."
                                 placeholderTextColor: "#9AA5B1"
                                 color: "#243B53"
                                 font.pixelSize: 12
@@ -52,14 +52,15 @@ Item {
                             onActivated: backend.filterCustomers(currentText)
                         }
                     }
-                    RowLayout { Layout.fillWidth: true
-                        Text { text: Math.round(backend.filteredCount).toLocaleString(Qt.locale("en_US")) + " matching records"; font.pixelSize: 11; color: "#7B8794" }
+                    RowLayout { Layout.fillWidth: true; spacing: 18
+                        Text { text: Math.round(backend.filteredCount).toString() + " matching records"; font.pixelSize: 11; color: "#7B8794" }
+                        Text { text: backend.modelReady ? ("Likely churning: " + backend.riskCount + " customers (" + backend.riskPercentage + ")") : "Train a model to show likely churn percentages"; font.pixelSize: 11; color: "#7B8794" }
                         Item { Layout.fillWidth: true }
-                        Text { text: "Search is limited to customer IDs"; font.pixelSize: 10; color: "#98A6B3" }
+                        Text { text: "Search covers customer IDs and names"; font.pixelSize: 10; color: "#98A6B3" }
                     }
                     Rectangle { Layout.fillWidth: true; implicitHeight: 43; radius: 7; color: "#F4F7FB"
                         RowLayout { anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 16; spacing: 9
-                            Repeater { model: [{t:"CUSTOMER ID", w:1.5},{t:"CONTRACT", w:1.5},{t:"TENURE", w:0.8},{t:"MONTHLY CHARGES", w:1.2},{t:"OUTCOME", w:0.9}]
+                            Repeater { model: [{t:"NAME", w:1.5},{t:"CUSTOMER ID", w:1.1},{t:"CONTRACT", w:1.2},{t:"TENURE", w:0.7},{t:"MONTHLY", w:0.9},{t:"LIKELY CHURN", w:0.8},{t:"OUTCOME", w:0.8}]
                                 delegate: Text { Layout.fillWidth: true; Layout.preferredWidth: modelData.w * 100; text: modelData.t; font.pixelSize: 10; font.weight: Font.DemiBold; font.letterSpacing: 0.6; color: "#7B8794"; elide: Text.ElideRight }
                             }
                         }
@@ -70,12 +71,14 @@ Item {
                         Repeater {
                             model: backend.visibleCustomers
                             delegate: Rectangle {
-                                Layout.fillWidth: true; height: backend.compactRows ? 36 : 44; color: index % 2 === 0 ? "#FFFFFF" : "#F9FBFF"
+                                Layout.fillWidth: true; height: backend.compactRows ? 38 : 46; color: index % 2 === 0 ? "#FFFFFF" : "#F9FBFF"
                                 RowLayout { anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 16; spacing: 9
-                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 150; text: modelData.customerId; font.pixelSize: 12; font.weight: Font.DemiBold; color: "#102A43"; elide: Text.ElideRight }
-                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 150; text: modelData.contract; font.pixelSize: 12; color: "#486581"; elide: Text.ElideRight }
-                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 80; text: modelData.tenure; font.pixelSize: 12; color: "#486581"; elide: Text.ElideRight }
-                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 120; text: modelData.monthly; font.pixelSize: 12; color: "#486581"; elide: Text.ElideRight }
+                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 160; text: modelData.customerName; font.pixelSize: 12; font.weight: Font.DemiBold; color: "#102A43"; elide: Text.ElideRight }
+                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 120; text: modelData.customerId; font.pixelSize: 12; color: "#486581"; elide: Text.ElideRight }
+                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 130; text: modelData.contract; font.pixelSize: 12; color: "#486581"; elide: Text.ElideRight }
+                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 70; text: modelData.tenure; font.pixelSize: 12; color: "#486581"; elide: Text.ElideRight }
+                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 100; text: modelData.monthly; font.pixelSize: 12; color: "#486581"; elide: Text.ElideRight }
+                                    Text { Layout.fillWidth: true; Layout.preferredWidth: 90; text: modelData.riskText; font.pixelSize: 12; font.weight: Font.DemiBold; color: (modelData.risk !== null && modelData.risk >= backend.riskThreshold) ? "#C96A10" : "#1D4ED8"; elide: Text.ElideRight }
                                     Item { Layout.fillWidth: true; Layout.preferredWidth: 90; height: 25
                                         Rectangle { anchors.verticalCenter: parent.verticalCenter; height: 24; width: badgeText.implicitWidth + 18; radius: 12
                                             color: modelData.status === "Churned" ? "#FFF4E8" : (modelData.status === "Retained" ? "#EFF6FF" : "#F3F6FA")
@@ -92,7 +95,7 @@ Item {
                         Layout.fillWidth: true; Layout.fillHeight: true; spacing: 8
                         Item { Layout.fillHeight: true }
                         Text { Layout.alignment: Qt.AlignHCenter; text: backend.hasData ? "No customers match your filters" : "No customer data yet"; font.pixelSize: 16; font.weight: Font.DemiBold; color: "#243B53" }
-                        Text { Layout.alignment: Qt.AlignHCenter; text: backend.hasData ? "Try another customer ID or churn status." : "Import a dataset from Data Sources to populate this table."; font.pixelSize: 12; color: "#7B8794" }
+                        Text { Layout.alignment: Qt.AlignHCenter; text: backend.hasData ? "Try another customer name, customer ID, or outcome filter." : "Import a dataset from Data Sources to populate this table."; font.pixelSize: 12; color: "#7B8794" }
                         Item { Layout.fillHeight: true }
                     }
                     Item { Layout.fillHeight: true }

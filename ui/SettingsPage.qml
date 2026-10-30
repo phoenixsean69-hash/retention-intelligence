@@ -46,7 +46,7 @@ Item { id: root
                     Text { text: 'Privacy & storage'; font.pixelSize: 17; font.weight: Font.DemiBold; color: '#102A43' }
                     Rectangle { Layout.fillWidth: true; height: 1; color: '#EDF2F7' }
                     Text { text: 'Imported data, application preferences and retention case logs stay on this computer in the local app-data directory.'; font.pixelSize: 12; color: '#486581'; Layout.fillWidth: true; wrapMode: Text.WordWrap }
-                    Text { text: 'Risk models are held in memory for this version, and must be retrained after restarting the application.'; font.pixelSize: 12; color: '#7B8794'; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                    Text { text: 'Trained risk models are saved locally for the current dataset and are restored automatically when you reopen the app.'; font.pixelSize: 12; color: '#7B8794'; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                     Item { Layout.fillHeight: true }
                 }
             }

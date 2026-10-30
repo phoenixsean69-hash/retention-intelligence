@@ -23,7 +23,7 @@ Item {
                         Text { text: 'Create retention case'; font.pixelSize: 17; font.weight: Font.DemiBold; color: '#102A43' }
                         Text { Layout.fillWidth: true; text: 'This is a record of an intended action, not a claim that the customer was saved.'; font.pixelSize: 11; color: '#7B8794'; wrapMode: Text.WordWrap }
                         Text { text: 'Customer ID'; font.pixelSize: 11; font.weight: Font.DemiBold; color: '#486581' }
-                        TextField { id: customerId; Layout.fillWidth: true; Layout.preferredHeight: 42; placeholderText: 'e.g. DEMO-0005'; enabled: backend.hasData }
+                        TextField { id: customerId; Layout.fillWidth: true; Layout.preferredHeight: 42; placeholderText: 'e.g. CUST-0005'; enabled: backend.hasData }
                         Text { text: 'Intervention'; font.pixelSize: 11; font.weight: Font.DemiBold; color: '#486581' }
                         ComboBox { id: action; Layout.fillWidth: true; Layout.preferredHeight: 42; model: ['Review account','Service quality follow-up','Billing assistance','Support callback','Offer review','Other'] }
                         Text { text: 'Case note'; font.pixelSize: 11; font.weight: Font.DemiBold; color: '#486581' }

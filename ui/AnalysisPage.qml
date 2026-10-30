@@ -23,12 +23,12 @@ Item {
             RowLayout {
                 Layout.fillWidth: true; Layout.leftMargin: 30; Layout.rightMargin: 30; spacing: 14
                 Rectangle {
-                    Layout.fillWidth: true; height: 66; radius: 12; color: '#EFF6FF'; border.color: '#D7E5FF'
+                    Layout.fillWidth: true; height: 66; radius: 12; color: '#FFFFFF'; border.color: '#E6ECF5'
                     RowLayout { anchors.fill: parent; anchors.margins: 18; spacing: 12
-                        AppIcon { iconName: 'analytics'; iconSize: 22; color: '#2563EB' }
+                        Rectangle { width: 4; height: 32; radius: 2; color: '#2563EB' }
                         ColumnLayout { Layout.fillWidth: true; spacing: 3
-                            Text { text: backend.hasData ? backend.churnRate + ' observed churn rate' : 'No dataset loaded'; font.pixelSize: 15; font.weight: Font.DemiBold; color: '#1D4ED8' }
-                            Text { text: 'Historical snapshot only — segment relationships are not causal explanations.'; font.pixelSize: 11; color: '#486581'; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            Text { text: backend.hasData ? backend.churnRate + ' observed churn rate' : 'No dataset loaded'; font.pixelSize: 15; font.weight: Font.DemiBold; color: '#102A43' }
+                            Text { text: 'Segment relationships describe the snapshot; they do not by themselves prove the cause of churn.'; font.pixelSize: 11; color: '#486581'; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         }
                     }
                 }
@@ -36,7 +36,7 @@ Item {
                     width: 214; height: 66; radius: 12; color: '#FFFFFF'; border.color: '#E6ECF5'
                     ColumnLayout { anchors.fill: parent; anchors.margins: 9; spacing: 3
                         Text { text: 'SEGMENT BY'; font.pixelSize: 10; font.weight: Font.DemiBold; color: '#7B8794' }
-                        ComboBox { id: dimension; Layout.fillWidth: true; Layout.preferredHeight: 31; model: ['Contract','Tenure','Monthly charges','Payment method']; enabled: backend.hasData }
+                        ComboBox { id: dimension; Layout.fillWidth: true; Layout.preferredHeight: 31; model: ['Contract', 'Tenure', 'Monthly charges', 'Payment method']; enabled: backend.hasData }
                     }
                 }
             }
@@ -48,29 +48,46 @@ Item {
                     subtitle: 'Observed churn share. Select a bar to highlight it.'
                     rows: root.activeRows
                 }
-                Rectangle {
-                    Layout.fillWidth: true; Layout.preferredWidth: 350; Layout.preferredHeight: 280; Layout.alignment: Qt.AlignTop
-                    color: '#FFFFFF'; border.color: '#E6ECF5'; radius: 14
-                    ColumnLayout { anchors.fill: parent; anchors.margins: 23; spacing: 12
-                        Text { text: 'Dataset coverage'; font.pixelSize: 16; font.weight: Font.DemiBold; color: '#102A43' }
-                        Rectangle { height: 1; Layout.fillWidth: true; color: '#EDF2F7' }
-                        Repeater {
-                            model: [ {t:'Customer rows',v:backend.dataQuality.rows}, {t:'Known churn labels',v:backend.summary.known}, {t:'Missing labels',v:backend.dataQuality.unlabeled}, {t:'Duplicate IDs',v:backend.dataQuality.duplicateIds} ]
-                            delegate: RowLayout { Layout.fillWidth: true; spacing: 6
-                                Text { text: modelData.t; font.pixelSize: 12; color: '#61748A'; Layout.fillWidth: true }
-                                Text { text: Math.round(modelData.v).toString(); font.pixelSize: 12; font.weight: Font.DemiBold; color: '#102A43' }
+                ColumnLayout {
+                    Layout.fillWidth: true; Layout.preferredWidth: 350; Layout.alignment: Qt.AlignTop; spacing: 16
+                    Rectangle {
+                        Layout.fillWidth: true; Layout.preferredHeight: 260
+                        color: '#FFFFFF'; border.color: '#E6ECF5'; radius: 14
+                        ColumnLayout { anchors.fill: parent; anchors.margins: 23; spacing: 12
+                            Text { text: 'Dataset coverage'; font.pixelSize: 16; font.weight: Font.DemiBold; color: '#102A43' }
+                            Rectangle { height: 1; Layout.fillWidth: true; color: '#EDF2F7' }
+                            Repeater {
+                                model: [ {t:'Customer rows',v:backend.dataQuality.rows}, {t:'Known churn labels',v:backend.summary.known}, {t:'Missing labels',v:backend.dataQuality.unlabeled}, {t:'Duplicate IDs',v:backend.dataQuality.duplicateIds} ]
+                                delegate: RowLayout { Layout.fillWidth: true; spacing: 6
+                                    Text { text: modelData.t; font.pixelSize: 12; color: '#61748A'; Layout.fillWidth: true }
+                                    Text { text: Math.round(modelData.v).toString(); font.pixelSize: 12; font.weight: Font.DemiBold; color: '#102A43' }
+                                }
+                            }
+                            Item { Layout.fillHeight: true }
+                        }
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true; Layout.preferredHeight: 330
+                        color: '#FFFFFF'; border.color: '#E6ECF5'; radius: 14
+                        ColumnLayout { anchors.fill: parent; anchors.margins: 23; spacing: 12
+                            Text { text: 'Recommendations to prevent churning'; font.pixelSize: 16; font.weight: Font.DemiBold; color: '#102A43' }
+                            Rectangle { height: 1; Layout.fillWidth: true; color: '#EDF2F7' }
+                            Repeater {
+                                model: backend.preventionRecommendations
+                                delegate: Rectangle {
+                                    Layout.fillWidth: true; color: '#F9FBFF'; border.color: '#E6ECF5'; radius: 10; implicitHeight: 72
+                                    ColumnLayout { anchors.fill: parent; anchors.margins: 12; spacing: 4
+                                        RowLayout { Layout.fillWidth: true
+                                            Text { text: modelData.title; font.pixelSize: 12; font.weight: Font.DemiBold; color: '#102A43'; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                                            Text { text: modelData.priority; font.pixelSize: 10; color: modelData.priority === 'High priority' ? '#C96A10' : '#2563EB' }
+                                        }
+                                        Text { text: modelData.why; font.pixelSize: 11; color: '#486581'; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                                        Text { text: modelData.action; font.pixelSize: 11; color: '#61748A'; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                                    }
+                                }
                             }
                         }
-                        Item { Layout.fillHeight: true }
-                        Text { text: 'Groups with no known outcomes are not shown. Small groups may produce unstable percentages.'; font.pixelSize: 11; color: '#7B8794'; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                     }
-                }
-            }
-            Rectangle {
-                Layout.fillWidth: true; Layout.leftMargin: 30; Layout.rightMargin: 30; implicitHeight: 96; radius: 12; color: '#FFF8F1'; border.color: '#FAD7B0'
-                RowLayout { anchors.fill: parent; anchors.margins: 20; spacing: 14
-                    AppIcon { iconName: 'info'; iconSize: 23; color: '#C96A10' }
-                    Text { Layout.fillWidth: true; text: 'No time-series trends are drawn from a single snapshot. Tenure and monthly-charge bands are descriptive groups in the dataset’s original units.'; wrapMode: Text.WordWrap; font.pixelSize: 12; color: '#8A5A12' }
                 }
             }
             Item { height: 14 }
