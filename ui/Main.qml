@@ -122,12 +122,22 @@ ApplicationWindow {
                     }
                 }
                 Rectangle { Layout.fillWidth: true; height: 1; color: "#E8EEF5" }
-                Loader {
-                    id: pageLoader
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    source: ["OverviewPage.qml", "CustomersPage.qml", "AnalysisPage.qml", "PredictionPage.qml", "RetentionPage.qml", "DataPage.qml", "ModelLabPage.qml", "ReportsPage.qml", "SettingsPage.qml"][appWindow.activePage]
-                }
+Loader {
+    id: pageLoader
+    Layout.fillWidth: true
+    Layout.fillHeight: true
+    source: ["OverviewPage.qml", "CustomersPage.qml", "AnalysisPage.qml", "PredictionPage.qml", "RetentionPage.qml", "DataPage.qml", "ModelLabPage.qml", "ReportsPage.qml", "SettingsPage.qml"][appWindow.activePage]
+
+    onLoaded: {
+        if (!item)
+            return
+
+        try {
+            item.hostWindow = appWindow
+        } catch (e) {
+        }
+    }
+}
                 Connections {
                     target: pageLoader.item
                     ignoreUnknownSignals: true

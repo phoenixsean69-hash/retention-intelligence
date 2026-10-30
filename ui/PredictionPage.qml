@@ -6,6 +6,7 @@ Item {
     id: root
     signal navigateRequested(int page)
     property var chosen: ({})
+    property var hostWindow: null
     ScrollView { id: viewport; anchors.fill: parent; clip: true; contentWidth: availableWidth; ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ColumnLayout { width: viewport.availableWidth; spacing: 18
             Item { height: 8 }
@@ -73,7 +74,16 @@ Item {
                         Text { text: root.chosen.probability !== undefined ? root.chosen.probability.toFixed(1) + '%' : '—'; font.pixelSize: 36; font.weight: Font.DemiBold; color: root.chosen.probability >= backend.riskThreshold ? '#C96A10' : '#1D4ED8' }
                         Text { Layout.fillWidth: true; text: root.chosen.customerId ? 'Percentage of likely churning within the current scoring model.' : 'Select a record to see its estimated likelihood.'; color: '#7B8794'; font.pixelSize: 11; wrapMode: Text.WordWrap }
                         Item { Layout.fillHeight: true }
-                        UiButton { label: 'Open retention workspace'; iconName: 'retention'; primary: false; onClicked: root.navigateRequested(4) }
+                        UiButton {
+    label: 'Open retention workspace'
+    primary: false
+    onClicked: {
+        if (root.hostWindow)
+            root.hostWindow.navigate(4)
+        else
+            root.navigateRequested(4)
+    }
+}
                     }
                 }
             }

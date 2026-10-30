@@ -334,22 +334,40 @@ class DesktopBackend(Backend):
 
     @Slot(str, str, str)
     def createCase(self, customer_id, action, note):
+        def normalize_customer_id(raw: str) -> str:
+            raw = (raw or "").strip().upper()
+            compact = "".join(ch for ch in raw if ch.isalnum())
+
+            if compact.startswith("DEMO") and compact[4:].isdigit():
+                return f"DEMO-{int(compact[4:]):04d}"
+
+            return raw
+
+        cleaned_id = normalize_customer_id(customer_id)
+
         if not self._data:
             self._notice = 'Import customer data before creating a retention case.'
-        elif not customer_id.strip():
+        elif not cleaned_id:
             self._notice = 'Enter a customer ID.'
         elif not self._dataset_fingerprint:
             self._notice = 'Dataset identity unavailable. Reimport your dataset.'
         else:
             actual_ids = self._data.frame[self._data.mapping['customer_id']].astype(str)
-            matches = actual_ids[actual_ids.str.lower() == customer_id.strip().lower()]
+            matches = actual_ids[actual_ids.str.upper() == cleaned_id]
+
             if matches.empty:
-                self._notice = 'Customer ID does not exist in the imported dataset.'
+                self._notice = f'Customer ID not found: {cleaned_id}'
             elif self._data.churn_series.loc[matches.index[0]] == True:
                 self._notice = 'This customer is already labeled churned. Retention cases are for retained or unlabeled customers.'
             else:
-                self._cases.create(self._dataset_fingerprint, str(matches.iloc[0]), action or 'Review account', note[:1000])
-                self._notice = 'Retention case created.'
+                self._cases.create(
+                    self._dataset_fingerprint,
+                    str(matches.iloc[0]),
+                    action or 'Review account',
+                    note[:1000]
+                )
+                self._notice = f'Retention case created for {matches.iloc[0]}.'
+
         self.changed.emit()
 
     @Slot(int, str)

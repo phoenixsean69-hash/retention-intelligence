@@ -42,12 +42,162 @@ Item {
             }
             RowLayout {
                 Layout.fillWidth: true; Layout.leftMargin: 30; Layout.rightMargin: 30; spacing: 16; Layout.alignment: Qt.AlignTop
-                SegmentChart {
-                    Layout.fillWidth: true; Layout.preferredWidth: 680; Layout.alignment: Qt.AlignTop
-                    heading: 'Churn by ' + dimension.currentText.toLowerCase()
-                    subtitle: 'Observed churn share. Select a bar to highlight it.'
-                    rows: root.activeRows
+ColumnLayout {
+    Layout.fillWidth: true
+    Layout.preferredWidth: 680
+    Layout.alignment: Qt.AlignTop
+    spacing: 16
+
+    SegmentChart {
+        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignTop
+        heading: 'Churn by ' + dimension.currentText.toLowerCase()
+        subtitle: 'Observed churn share. Select a bar to highlight it.'
+        rows: root.activeRows
+    }
+
+    Rectangle {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 270
+        color: "#FFFFFF"
+        border.color: "#E6ECF5"
+        radius: 14
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 22
+            spacing: 10
+
+            Text {
+                text: "Churn trend across tenure bands"
+                font.pixelSize: 16
+                font.weight: Font.DemiBold
+                color: "#102A43"
+            }
+
+            Text {
+                text: "Observed churn rate by tenure group"
+                font.pixelSize: 11
+                color: "#7B8794"
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: "#EDF2F7"
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                Canvas {
+                    id: tenureLineChart
+                    anchors.fill: parent
+                    anchors.bottomMargin: 34
+                    property var rows: backend.tenureSegments
+
+                    onPaint: {
+                        var ctx = getContext("2d");
+                        ctx.clearRect(0, 0, width, height);
+
+                        var rows = tenureLineChart.rows;
+                        if (!rows || rows.length < 2)
+                            return;
+
+                        var left = 34;
+                        var right = 18;
+                        var top = 16;
+                        var bottom = 18;
+                        var chartW = width - left - right;
+                        var chartH = height - top - bottom;
+
+                        // grid lines
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#E8EEF5";
+                        for (var g = 0; g <= 4; g++) {
+                            var gy = top + chartH * g / 4;
+                            ctx.beginPath();
+                            ctx.moveTo(left, gy);
+                            ctx.lineTo(left + chartW, gy);
+                            ctx.stroke();
+                        }
+
+                        // line
+                        ctx.lineWidth = 3;
+                        ctx.strokeStyle = "#2563EB";
+                        ctx.beginPath();
+
+                        for (var i = 0; i < rows.length; i++) {
+                            var x = left + (chartW * i / Math.max(1, rows.length - 1));
+                            var y = top + chartH - (chartH * rows[i].rate / 100.0);
+                            if (i === 0)
+                                ctx.moveTo(x, y);
+                            else
+                                ctx.lineTo(x, y);
+                        }
+                        ctx.stroke();
+
+                        // points
+                        for (var j = 0; j < rows.length; j++) {
+                            var px = left + (chartW * j / Math.max(1, rows.length - 1));
+                            var py = top + chartH - (chartH * rows[j].rate / 100.0);
+
+                            ctx.fillStyle = "#F28C28";
+                            ctx.beginPath();
+                            ctx.arc(px, py, 4.5, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+
+                    onRowsChanged: requestPaint()
+                    onWidthChanged: requestPaint()
+                    onHeightChanged: requestPaint()
+
+                    Connections {
+                        target: backend
+                        function onStateChanged() { tenureLineChart.requestPaint() }
+                    }
                 }
+
+                RowLayout {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    spacing: 0
+
+                    Repeater {
+                        model: backend.tenureSegments
+                        delegate: Item {
+                            Layout.fillWidth: true
+                            height: 32
+
+                            Column {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                spacing: 1
+
+                                Text {
+                                    text: modelData.name
+                                    font.pixelSize: 10
+                                    color: "#61748A"
+                                    horizontalAlignment: Text.AlignHCenter
+                                }
+
+                                Text {
+                                    text: modelData.rate.toFixed(1) + "%"
+                                    font.pixelSize: 10
+                                    font.weight: Font.DemiBold
+                                    color: "#102A43"
+                                    horizontalAlignment: Text.AlignHCenter
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
                 ColumnLayout {
                     Layout.fillWidth: true; Layout.preferredWidth: 350; Layout.alignment: Qt.AlignTop; spacing: 16
                     Rectangle {
